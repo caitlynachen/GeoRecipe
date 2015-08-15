@@ -113,6 +113,30 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
     }
     
+    func clearEverything(){
+        
+        navbar.topItem?.title = "Create a Recipe"
+        autocompleteTextfield.hidden = false
+        editLocButton.hidden = true
+        placeholderLabel.hidden = false
+
+        titleTextField.text = ""
+        autocompleteTextfield.text = ""
+        descriptionText.text = ""
+        imageView?.image = nil
+        prepTime.text = ""
+        cookTime.text = ""
+        numOfServings.text = ""
+        ingTextView.text = ""
+        instructionsTextView.text = ""
+        cameraButton.hidden = false
+        placeholderIngredientsLabel.hidden = false
+        placeholderIngredientsLabelExample.hidden = false
+        placeholderInstructionsLabel.hidden = false
+        placeholderInstructionsLabelExample.hidden = false
+        var point = CGPoint(x: 0, y: self.scrollView.contentInset.top)
+        self.scrollView.setContentOffset(point, animated: true)
+    }
     
     override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
         if let ident = identifier {
@@ -150,7 +174,6 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
                     emptyLabel.hidden = false
                     
                 } else {
-                    
                     return true
                 }
             } else if ident == "PresentEditLocationScene" {
@@ -180,10 +203,11 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             
             
             svc.annotationCurrent = currentAnnotation
-        } else if (segue.identifier == "PresentEditLocationScene") {
-             var svc = segue.destinationViewController as! ViewController;
-            svc.anno = annotation
         }
+//        } else if (segue.identifier == "PresentEditLocationScene") {
+//             var svc = segue.destinationViewController as! ViewController;
+//            svc.anno = annotation
+//        }
     }
     
     @IBAction func cameraButtonTapped(sender: AnyObject) {
@@ -393,20 +417,17 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             
             if locationLabelFromPostDisplay != nil{
                 autocompleteTextfield.text = "Using buton instead"
-                editLocButton.setTitle(locationLabelFromPostDisplay, forState: .Normal)
-                println(annotation?.post.country = editLocButton.currentTitle)
-                annotation?.post.country = editLocButton.currentTitle
+                var loc = locationLabelFromPostDisplay
+                
+                annotation?.post.country = loc!
                 annotation?.post.location = pfgeopoint
                 
-                locationLabelFromPostDisplay = nil
-
-            } else{
-            
-                autocompleteTextfield.text = "Using buton instead"
-
-
-                editLocButton.setTitle(annotation?.subtitle, forState: .Normal)
+                
             }
+            
+            autocompleteTextfield.text = "Using buton instead"
+            
+            editLocButton.setTitle(annotation?.subtitle, forState: .Normal)
             
             
             let ingredientsArrayFromMap = annotation?.ingredients
@@ -556,8 +577,6 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         annotation?.post.saveInBackgroundWithBlock(nil)
         
         
-        
-        
     }
     
     func createPost(){
@@ -638,6 +657,7 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         currentAnnotation = annotationToAdd
         //        mapViewController.mapView.addAnnotation(annotationToAdd)
+
         
         
     }
