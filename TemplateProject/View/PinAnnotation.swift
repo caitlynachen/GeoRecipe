@@ -5,10 +5,9 @@ import Parse
 
 class PinAnnotation : NSObject, MKAnnotation {
     
-    let title: String
+    let title: String?
     let coordinate: CLLocationCoordinate2D
     let Description: String
-    let subtitle:String
     let instructions: [String]
     let ingredients: [String]
     let image: PFFile
@@ -20,11 +19,10 @@ class PinAnnotation : NSObject, MKAnnotation {
     let servings: String
     
     
-    init (title: String, coordinate: CLLocationCoordinate2D, Description: String, subtitle: String, instructions: [String], ingredients: [String], image:PFFile, user: PFUser, date: NSDate, prep: String, cook: String, servings: String, post: Post){
+    init (title: String, coordinate: CLLocationCoordinate2D, Description: String, instructions: [String], ingredients: [String], image:PFFile, user: PFUser, date: NSDate, prep: String, cook: String, servings: String, post: Post){
         self.title = title
         self.coordinate = coordinate
         self.Description = Description
-        self.subtitle = subtitle
         self.ingredients = ingredients
         self.instructions = instructions
         self.image = image

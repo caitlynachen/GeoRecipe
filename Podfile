@@ -1,10 +1,15 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '6.0'
+# platform :ios, '9.0'
 
-use_frameworks!
+target 'GeoRecipe' do
+  # Comment this line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
 
-target 'TemplateProject' do
-	pod 'Mixpanel'
-	pod 'DateTools'
+    pod 'Bond'
+    pod 'Mixpanel'
+    pod 'ConvenienceKit'
+    pod 'DateTools'
+
+  # Pods for GeoRecipe
+
 end
-

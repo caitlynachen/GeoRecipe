@@ -18,12 +18,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
 
     @IBOutlet weak var navbar: UINavigationBar!
     
-    @IBOutlet weak var editLocButton: UIButton!
     @IBOutlet weak var ingTextView: UITextView!
     @IBOutlet weak var instructionsTextView: UITextView!
     @IBOutlet weak var emptyLabel: UILabel!
     @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var autocompleteTextfield: AutoCompleteTextField!
     
     @IBOutlet weak var cookTime: UITextField!
     private var responseData:NSMutableData?
@@ -57,7 +55,7 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     
     let post = Post()
     
-        var toLoc: PFGeoPoint?
+    var toLoc: PFGeoPoint?
     var image: UIImage?
     var annotation: PinAnnotation?
     @IBOutlet weak var cameraButton: UIButton!
@@ -67,16 +65,16 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
         if textField == prepTime{
-            let newLength = count(textField.text!) + count(string) - range.length
+            let newLength = (textField.text!).characters.count + string.characters.count - range.length
             return newLength <= 13 //Bool
         } else if textField == cookTime {
-            let newLength = count(textField.text!) + count(string) - range.length
+            let newLength = (textField.text!).characters.count + string.characters.count - range.length
             return newLength <= 13 //Bo
         } else if textField == numOfServings {
-            let newLength = count(textField.text!) + count(string) - range.length
+            let newLength = (textField.text!).characters.count + string.characters.count - range.length
             return newLength <= 13 //Bo
         } else {
-            let newLength = count(textField.text!) + count(string) - range.length
+            let newLength = (textField.text!).characters.count + string.characters.count - range.length
             return newLength <= 100 //Bo
         }
     }
@@ -116,12 +114,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     func clearEverything(){
         
         navbar.topItem?.title = "Create a Recipe"
-        autocompleteTextfield.hidden = false
-        editLocButton.hidden = true
+        
         placeholderLabel.hidden = false
 
         titleTextField.text = ""
-        autocompleteTextfield.text = ""
         descriptionText.text = ""
         imageView?.image = nil
         prepTime.text = ""
@@ -134,19 +130,15 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         placeholderIngredientsLabelExample.hidden = false
         placeholderInstructionsLabel.hidden = false
         placeholderInstructionsLabelExample.hidden = false
-        var point = CGPoint(x: 0, y: self.scrollView.contentInset.top)
+        let point = CGPoint(x: 0, y: self.scrollView.contentInset.top)
         self.scrollView.setContentOffset(point, animated: true)
     }
     
-    override func shouldPerformSegueWithIdentifier(identifier: String?, sender: AnyObject?) -> Bool {
-        if let ident = identifier {
-            if ident == "fromPostDiplayToMap" {
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+//        if let ident = identifier {
+            if identifier == "fromPostDiplayToMap" {
                 if titleTextField.text == "" {
                     emptyLabel.text = "Please enter a title."
-                    emptyLabel.hidden = false
-                    
-                } else if autocompleteTextfield.text == "" {
-                    emptyLabel.text = "Please enter location tag."
                     emptyLabel.hidden = false
                     
                 } else if imageView?.image == nil {
@@ -176,38 +168,16 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
                 } else {
                     return true
                 }
-            } else if ident == "PresentEditLocationScene" {
+            } else if identifier == "PresentEditLocationScene" {
                     return true
                 
             }
-        }
+//        }
         
         return false
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier == "fromPostDiplayToMap") {
-            var svc = segue.destinationViewController as! MapViewController;
-            
-            if annotation?.post == nil{
-               
-                createPost()
-                 self.mixpanel.track("Segue", properties: ["from Post Display to Map View": "Create"])
-                
-            } else {
-                updatePost()
-                self.mixpanel.track("Segue", properties: ["from Post Display to Map View": "Update"])
-                svc.updatedPost = annotation
-//                svc.coorForUpdatedPost = annotation?.coordinate
-            }
-            
-            
-            svc.annotationCurrent = currentAnnotation
-        }
-//        } else if (segue.identifier == "PresentEditLocationScene") {
-//             var svc = segue.destinationViewController as! ViewController;
-//            svc.anno = annotation
-//        }
     }
     
     @IBAction func cameraButtonTapped(sender: AnyObject) {
@@ -220,21 +190,29 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
                 
                 self.imageView?.image = image!
                 
-                let imageData = UIImageJPEGRepresentation(image, 0.8)
-                let imageFile = PFFile(data: imageData)
+                let imageData = UIImageJPEGRepresentation(image!, 0.8)
+                let imageFile = PFFile(data: (imageData)!)
                 //imageFile.save()
                 
                 //let post = PFObject(className: "Post")
                 if self.annotation == nil {
                     self.post["imageFile"] = imageFile
-                    self.post.save()
+                    do{
+                        try self.post.save()
+                    } catch{
+                        
+                    }
                     
                 } else {
-                    let imageData = UIImageJPEGRepresentation(self.imageView?.image, 0.8)
-                    let imageFile = PFFile(data: imageData)
+                    let imageData = UIImageJPEGRepresentation((self.imageView?.image)!, 0.8)
+                    let imageFile = PFFile(data: imageData!)
                     
                     self.annotation?.post.imageFile = imageFile
-                    self.annotation?.post.imageFile?.save()
+                    do{
+                        try self.annotation?.post.imageFile?.save()
+                    } catch{
+                        
+                    }
                     
                 }
                 
@@ -247,37 +225,27 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     var instructionsArray: [String] = []
     func textViewDidChange(textView: UITextView) {
         if textView == descriptionText{
-            placeholderLabel.hidden = count(textView.text) != 0
+            placeholderLabel.hidden = textView.text.characters.count != 0
             
         } else if textView == ingTextView{
-            placeholderIngredientsLabel.hidden = count(textView.text) != 0
-            placeholderIngredientsLabelExample.hidden = count(textView.text) != 0
+            placeholderIngredientsLabel.hidden = textView.text.characters.count != 0
+            placeholderIngredientsLabelExample.hidden = textView.text.characters.count != 0
             
         } else if textView == instructionsTextView {
-            placeholderInstructionsLabel.hidden = count(textView.text) != 0
-            placeholderInstructionsLabelExample.hidden = count(textView.text) != 0
+            placeholderInstructionsLabel.hidden = textView.text.characters.count != 0
+            placeholderInstructionsLabelExample.hidden = textView.text.characters.count != 0
             
         }
     }
     
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        
-        textField.resignFirstResponder()
-        
-        if textField == autocompleteTextfield {
-            autocompleteTextfield.hidesWhenEmpty =  true
-        }
-        return true
-    }
     
     func appendIngredientsAndInstructions(){
         
-        var ingredi = split(ingTextView.text) {$0 == "\n"}
+        let ingredi = ingTextView.text.characters.split {$0 == "\n"}.map { String($0) }
         self.ingredientsArray = ingredi
         
         
-        var instruc = split(instructionsTextView.text) {$0 == "\n"}
+        let instruc = instructionsTextView.text.characters.split {$0 == "\n"}.map { String($0) }
         
         self.instructionsArray = instruc
         
@@ -294,14 +262,11 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         
         titleTextField.delegate = self
-        autocompleteTextfield.delegate = self
         prepTime.delegate = self
         cookTime.delegate = self
         numOfServings.delegate = self
         
         emptyLabel.hidden = true
-        configureTextField()
-        handleTextFieldInterfaces()
         
         imageView!.layer.borderWidth = 0.5
         imageView!.layer.borderColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.2).CGColor
@@ -318,16 +283,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         instructionsTextView.layer.cornerRadius = 5
         
         
-        //picker = UIPickerView(2
-        
-        editLocButton.hidden = true
-
-        
-        
         let screenSize: CGRect = UIScreen.mainScreen().bounds
         
         let screenWidth = screenSize.width
-        let screenHeight = screenSize.height
+//        let screenHeight = screenSize.height
         
         scrollView.contentSize.width = screenWidth
         
@@ -337,10 +296,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         placeholderLabel.sizeToFit()
         descriptionText.addSubview(placeholderLabel)
         
-        placeholderLabel.frame.origin = CGPointMake(5, descriptionText.font.pointSize / 2)
+        placeholderLabel.frame.origin = CGPointMake(5, descriptionText.font!.pointSize / 2)
         placeholderLabel.font = UIFont(name: placeholderLabel.font.fontName, size: 12)
         placeholderLabel.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderLabel.hidden = count(descriptionText.text) != 0
+        placeholderLabel.hidden = descriptionText.text.characters.count != 0
         
         ingTextView.delegate = self
         placeholderIngredientsLabel = UILabel()
@@ -349,9 +308,9 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         placeholderIngredientsLabel.sizeToFit()
         ingTextView.addSubview(placeholderIngredientsLabel)
         
-        placeholderIngredientsLabel.frame.origin = CGPointMake(5, ingTextView.font.pointSize / 2)
+        placeholderIngredientsLabel.frame.origin = CGPointMake(5, ingTextView.font!.pointSize / 2)
         placeholderIngredientsLabel.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderIngredientsLabel.hidden = count(ingTextView.text) != 0
+        placeholderIngredientsLabel.hidden = ingTextView.text.characters.count != 0
         
         
         instructionsTextView.delegate = self
@@ -361,9 +320,9 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         placeholderInstructionsLabel.sizeToFit()
         instructionsTextView.addSubview(placeholderInstructionsLabel)
         
-        placeholderInstructionsLabel.frame.origin = CGPointMake(5, descriptionText.font.pointSize / 2)
+        placeholderInstructionsLabel.frame.origin = CGPointMake(5, descriptionText.font!.pointSize / 2)
         placeholderInstructionsLabel.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderInstructionsLabel.hidden = count(instructionsTextView.text) != 0
+        placeholderInstructionsLabel.hidden = instructionsTextView.text.characters.count != 0
         
         
         placeholderInstructionsLabelExample = UILabel()
@@ -374,7 +333,7 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         placeholderInstructionsLabelExample.frame.origin = CGPoint(x: 5, y: 22)
         placeholderInstructionsLabelExample.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderInstructionsLabelExample.hidden = count(instructionsTextView.text) != 0
+        placeholderInstructionsLabelExample.hidden = instructionsTextView.text.characters.count != 0
         
         
         placeholderIngredientsLabelExample = UILabel()
@@ -385,20 +344,24 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         placeholderIngredientsLabelExample.frame.origin = CGPoint(x: 5, y: 22)
         placeholderIngredientsLabelExample.textColor = UIColor(white: 0, alpha: 0.2)
-        placeholderIngredientsLabelExample.hidden = count(ingTextView.text) != 0
+        placeholderIngredientsLabelExample.hidden = ingTextView.text.characters.count != 0
         
         appendIngredientsAndInstructions()
         
         if annotation?.post != nil{
-            var data = annotation?.image.getData()
+            do{
+            let data = try annotation?.image.getData()
             image = UIImage(data: data!)
+            } catch{
+                
+            }
             imageView?.image = image
             
             
         }
         
         
-        if (annotation?.ingredients != nil && annotation?.instructions != nil && annotation?.title != nil && annotation?.Description != nil && annotation?.image != nil && annotation?.subtitle != nil && annotation?.servings != nil && annotation?.prep != nil && annotation?.cook != nil) {
+        if (annotation?.ingredients != nil && annotation?.instructions != nil && annotation?.title != nil && annotation?.Description != nil && annotation?.image != nil && annotation?.servings != nil && annotation?.prep != nil && annotation?.cook != nil) {
             
             navbar.topItem?.title = "Edit Post"
             
@@ -408,46 +371,36 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             prepTime.text = annotation?.prep
             numOfServings.text = annotation?.servings
             
-//            autocompleteTextfield.text = annotation?.country
-//            configureTextField()
-//            handleTextFieldInterfaces()
-            
-            autocompleteTextfield.hidden = true
-            editLocButton.hidden = false
             
             if locationLabelFromPostDisplay != nil{
-                autocompleteTextfield.text = "Using buton instead"
-                var loc = locationLabelFromPostDisplay
+             
+                _ = locationLabelFromPostDisplay
                 
-                annotation?.post.country = loc!
                 annotation?.post.location = pfgeopoint
                 
                 
             }
             
-            autocompleteTextfield.text = "Using buton instead"
-            
-            editLocButton.setTitle(annotation?.subtitle, forState: .Normal)
             
             
             let ingredientsArrayFromMap = annotation?.ingredients
-            let stringedi = "\n".join(ingredientsArrayFromMap!)
+            let stringedi = (ingredientsArrayFromMap!).joinWithSeparator("\n")
             ingTextView.text = stringedi
             
             
             let instructionsArrayFromMap = annotation?.instructions
-            let strinstuc = "\n".join(instructionsArrayFromMap!)
+            let strinstuc = (instructionsArrayFromMap!).joinWithSeparator("\n")
             instructionsTextView.text = strinstuc
             
             //            autocompleteTextfield.enabled = false
             
-            placeholderLabel.hidden = count(descriptionText.text) != 0
-            placeholderIngredientsLabel.hidden = count(ingTextView.text) != 0
+            placeholderLabel.hidden = descriptionText.text.characters.count != 0
+            placeholderIngredientsLabel.hidden = ingTextView.text.characters.count != 0
             
-            placeholderInstructionsLabel.hidden = count(instructionsTextView.text) != 0
+            placeholderInstructionsLabel.hidden = instructionsTextView.text.characters.count != 0
             
-            placeholderIngredientsLabelExample.hidden = count(ingTextView.text) != 0
-            placeholderInstructionsLabelExample.hidden = count(ingTextView.text) != 0
+            placeholderIngredientsLabelExample.hidden = ingTextView.text.characters.count != 0
+            placeholderInstructionsLabelExample.hidden = ingTextView.text.characters.count != 0
             
             
         }
@@ -458,56 +411,10 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         // Do any additional setup after loading the view.
     }
     
-    private func configureTextField(){
-        autocompleteTextfield.autoCompleteTextColor = UIColor(red: 128.0/255.0, green: 128.0/255.0, blue: 128.0/255.0, alpha: 1.0)
-        autocompleteTextfield.autoCompleteTextFont = UIFont(name: "HelveticaNeue-Light", size: 12.0)
-        autocompleteTextfield.autoCompleteCellHeight = 35.0
-        autocompleteTextfield.maximumAutoCompleteCount = 20
-        autocompleteTextfield.hidesWhenSelected = true
-        autocompleteTextfield.hidesWhenEmpty = true
-        autocompleteTextfield.enableAttributedText = true
-        var attributes = [String:AnyObject]()
-        attributes[NSForegroundColorAttributeName] = UIColor.blackColor()
-        attributes[NSFontAttributeName] = UIFont(name: "HelveticaNeue-Bold", size: 12.0)
-        autocompleteTextfield.autoCompleteAttributes = attributes
-    }
     
     var coordinateh: CLLocationCoordinate2D?
     
     var pfgeopoint: PFGeoPoint?
-    
-    
-    private func handleTextFieldInterfaces(){
-        autocompleteTextfield.onTextChange = {[weak self] text in
-            if !text.isEmpty{
-                if self!.connection != nil{
-                    self!.connection!.cancel()
-                    self!.connection = nil
-                }
-                let urlString = "\(self!.baseURLString)?key=\(self!.googleMapsKey)&input=\(text)"
-                let url = NSURL(string: urlString.stringByAddingPercentEscapesUsingEncoding(NSASCIIStringEncoding)!)
-                if url != nil{
-                    let urlRequest = NSURLRequest(URL: url!)
-                    self!.connection = NSURLConnection(request: urlRequest, delegate: self)
-                }
-            }
-        }
-        
-        autocompleteTextfield.onSelect = {[weak self] text, indexpath in
-            Location.geocodeAddressString(text, completion: { (placemark, error) -> Void in
-                if placemark != nil{
-                    let coordinate = placemark!.location.coordinate
-                    
-                    self!.autocompleteTextfield.text = text
-                    
-                    self!.coordinateh = coordinate
-                    self!.pfgeopoint = PFGeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                    self?.autocompleteTextfield.resignFirstResponder()
-                }
-            })
-        }
-    }
-    
     
     //MARK: NSURLConnectionDelegate
     func connection(connection: NSURLConnection, didReceiveResponse response: NSURLResponse) {
@@ -518,29 +425,8 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         responseData?.appendData(data)
     }
     
-    func connectionDidFinishLoading(connection: NSURLConnection) {
-        if responseData != nil{
-            var error:NSError?
-            if let result = NSJSONSerialization.JSONObjectWithData(responseData!, options: nil, error: &error) as? NSDictionary{
-                let status = result["status"] as? String
-                if status == "OK"{
-                    if let predictions = result["predictions"] as? NSArray{
-                        var locations = [String]()
-                        for dict in predictions as! [NSDictionary]{
-                            locations.append(dict["description"] as! String)
-                        }
-                        self.autocompleteTextfield.autoCompleteStrings = locations
-                    }
-                }
-                else{
-                    self.autocompleteTextfield.autoCompleteStrings = nil
-                }
-            }
-        }
-    }
-    
     func connection(connection: NSURLConnection, didFailWithError error: NSError) {
-        println("Error: \(error.localizedDescription)")
+        print("Error: \(error.localizedDescription)")
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -551,29 +437,24 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
     
     
     
-    //var instructionsViewController = InstructionsViewController()
-    
     func updatePost() {
         
         appendIngredientsAndInstructions()
-        //change parse info
         
-//        if pfgeopoint != nil {
-//            annotation?.post.location = pfgeopoint
-//
-//        }
         annotation?.post.prep = prepTime.text
         annotation?.post.cook = cookTime.text
         annotation?.post.servings = numOfServings.text
         annotation?.post.RecipeTitle = titleTextField.text
         annotation?.post.caption = descriptionText.text
-        annotation?.post.country = editLocButton.currentTitle
         annotation?.post.Ingredients = ingredientsArray
         annotation?.post.Instructions = instructionsArray
         
         
-        
-        annotation?.post.save()
+        do{
+            try annotation?.post.save()
+        } catch{
+            
+        }
         annotation?.post.saveInBackgroundWithBlock(nil)
         
         
@@ -592,7 +473,6 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         post.servings = numOfServings.text
         post.caption = descriptionText.text
         post.RecipeTitle = titleTextField.text
-        post.country = autocompleteTextfield.text
         post.location = pfgeopoint
         post.Ingredients = self.ingredientsArray
         post.Instructions = self.instructionsArray
@@ -600,10 +480,6 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         if titleTextField.text == "" {
             emptyLabel.text = "Please enter a title."
-            emptyLabel.hidden = false
-            
-        } else if autocompleteTextfield.text == ""{
-            emptyLabel.text = "Please enter location tag."
             emptyLabel.hidden = false
             
         } else if imageView?.image == nil {
@@ -631,8 +507,11 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
             emptyLabel.hidden = false
             
         } else {
-            
-            post.save()
+            do{
+                try post.save()
+            } catch{
+                
+            }
             post.uploadPost()
         }
 
@@ -640,23 +519,22 @@ class PostDisplayViewController: UIViewController, UINavigationControllerDelegat
         
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let mapViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
+        _ = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
         
         
-        let test = post.Ingredients!
+        _ = post.Ingredients!
         
       
         if coordinateh == nil{
-            var latitu = toLoc?.latitude
-            var longit = toLoc?.longitude
+            let latitu = toLoc?.latitude
+            let longit = toLoc?.longitude
             
             coordinateh = CLLocationCoordinate2DMake(latitu!, longit!)
         }
         
-        var annotationToAdd = PinAnnotation(title: post.RecipeTitle!, coordinate: coordinateh!, Description: post.caption!, subtitle: post.country!, instructions: post.Instructions!, ingredients: post.Ingredients!, image: post.imageFile!, user: post.user!, date: post.date!, prep: post.prep!, cook: post.cook!, servings: post.servings!, post: post)
+        let annotationToAdd = PinAnnotation(title: post.RecipeTitle!, coordinate: coordinateh!, Description: post.caption!, instructions: post.Instructions!, ingredients: post.Ingredients!, image: post.imageFile!, user: post.user!, date: post.date!, prep: post.prep!, cook: post.cook!, servings: post.servings!, post: post)
         
         currentAnnotation = annotationToAdd
-        //        mapViewController.mapView.addAnnotation(annotationToAdd)
 
         
         

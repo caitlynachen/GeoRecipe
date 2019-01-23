@@ -33,13 +33,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     Parse.setApplicationId("M5sFAPlVPwU1VB46sqv8mjAGnPhGH0FgPKQVVH7Z", clientKey: "661QfJdLp0Oi8mwTltKEePEMokJTYncGbPA3rBzj")
     
-    PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
+//    PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
     
     // check if we have logged in user
        
     // check if we have logged in user
     // 2
-    let user = PFUser.currentUser()
+    _ = PFUser.currentUser()
     
     let startViewController: UIViewController;
     
@@ -48,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 3
         // if we have a user, set the TabBarController to be the initial View Controller
     let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    startViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") as! UIViewController
+    startViewController = storyboard.instantiateViewControllerWithIdentifier("MapViewController") 
     
 
     
@@ -85,7 +85,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FBSDKAppEvents.activateApp()
     }
     
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
         return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     

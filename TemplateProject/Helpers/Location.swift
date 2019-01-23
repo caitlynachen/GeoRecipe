@@ -15,8 +15,8 @@ class Location{
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(address, completionHandler: { (placemarks, error) -> Void in
             if error == nil{
-                if placemarks.count > 0{
-                    completion(placemark: (placemarks[0] as? CLPlacemark), error: error)
+                if placemarks!.count > 0{
+                    completion(placemark: (placemarks![0] as? CLPlacemark), error: error)
                 }
             }
             else{
@@ -29,7 +29,7 @@ class Location{
         let geoCoder = CLGeocoder()
         geoCoder.reverseGeocodeLocation(location, completionHandler: { (placemarks, error) -> Void in
             if error != nil{
-                println("Error Reverse Geocoding Location: \(error.localizedDescription)")
+                print("Error Reverse Geocoding Location: \(error!.localizedDescription)")
                 completion(placemark: nil, error: error)
                 return
             }
@@ -42,7 +42,7 @@ class Location{
     
     class func addressFromPlacemark(placemark:CLPlacemark)->String{
         var address = ""
-        let name = placemark.addressDictionary["Name"] as? String
+        let name = placemark.addressDictionary!["Name"] as? String
         let city = placemark.addressDictionary["City"] as? String
         let state = placemark.addressDictionary["State"] as? String
         let country = placemark.country
